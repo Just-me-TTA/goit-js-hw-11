@@ -10,8 +10,10 @@ body {
     background-color: #fafafa;
     color: #212121;
     line-height: 1.5;
-    padding: 20px;
+    padding: 8px;
 }
+h1 {font-size: 56px;
+color: #135b16;}
 
 img {
     display: block;
