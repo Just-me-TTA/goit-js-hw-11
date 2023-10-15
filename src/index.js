@@ -1,55 +1,69 @@
+import axios from 'axios';
+import Notiflix from 'notiflix';
+
 const apiKey = '40060797-f13629dcce3146cc8bd36115b';
 
 const searchForm = document.querySelector('.search-form');
 const imageGallery = document.querySelector('.gallery');
-const errorMessage = document.querySelector('.error-message');
 const loadMoreButton = document.querySelector('.load-more');
+
+let page = 1;
+let searchQuery = '';
+let totalHits = 0;
+let perPage = 40;
 
 searchForm.addEventListener('submit', handleFormSubmit);
 loadMoreButton.addEventListener('click', handleLoadMoreClick);
 
-let page = 1;
+loadMoreButton.style.display = 'none';
 
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
     event.preventDefault();
-    const searchQuery = searchForm.querySelector('input[name="searchQuery"]').value;
-    
+    searchQuery = searchForm.querySelector('input[name="searchQuery"]').value;
+
     if (searchQuery) {
-        page = 1; // Скидаємо сторінку при новому пошуку
-        fetchImages(searchQuery);
+        page = 1;
+        clearImageGallery();
+        loadMoreButton.style.display = 'none';
+        await fetchImages();
     } else {
         clearImageGallery();
         showError('Please enter a search query.');
     }
 }
 
-async function fetchImages(searchQuery, nextPage = 1) {
-    const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${nextPage}&per_page=40`;
-    
-    if (nextPage === 1) {
-        clearImageGallery();
-    }
+async function fetchImages() {
     showLoader();
 
     try {
-        const response = await fetch(apiUrl);
-        if (response.ok) {
-            const data = await response.json();
+        const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`;
+        const response = await axios.get(apiUrl);
+
+        if (response.status === 200) {
+            const data = response.data;
+
             if (data.hits.length > 0) {
                 renderImages(data.hits);
-                page = nextPage;
+                totalHits = data.totalHits;
+
+                if (page * perPage >= totalHits) {
+                    loadMoreButton.style.display = 'none';
+                    Notiflix.Notify.info('We\'re sorry, but you\'ve reached the end of search results.');
+                } else {
+                    loadMoreButton.style.display = 'block';
+                }
             } else {
                 loadMoreButton.style.display = 'none';
-                if (nextPage === 1) {
-                    showError("Sorry, there are no images matching your search query. Please try again.");
-                }
+                Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
             }
         } else {
-            showError('An error occurred while fetching images. Please try again later.');
+            loadMoreButton.style.display = 'none';
+            Notiflix.Notify.failure('An error occurred while fetching images. Please try again later.');
         }
     } catch (error) {
         console.error('An error occurred:', error);
-        showError('An error occurred while fetching images. Please try again later.');
+        loadMoreButton.style.display = 'none';
+        Notiflix.Notify.failure('An error occurred while fetching images. Please try again later.');
     } finally {
         hideLoader();
     }
@@ -57,7 +71,7 @@ async function fetchImages(searchQuery, nextPage = 1) {
 
 function renderImages(images) {
     images.forEach(image => {
-        const imageElement = createImageElement(image.webformatURL, image.largeImageURL, image.tags);
+        const imageElement = createImageElement(image.webformatURL, image.largeImageURL, image.tags, image.likes, image.views, image.comments, image.downloads);
         imageGallery.appendChild(imageElement);
     });
 }
@@ -70,20 +84,17 @@ function clearImageGallery() {
 
 function showLoader() {
     searchForm.classList.add('loading');
-    loadMoreButton.style.display = 'none';
 }
 
 function hideLoader() {
     searchForm.classList.remove('loading');
-    loadMoreButton.style.display = 'block';
 }
 
 function showError(message) {
-    errorMessage.textContent = message;
-    errorMessage.classList.remove('hidden');
+    Notiflix.Notify.failure(message);
 }
 
-function createImageElement(webformatURL, largeImageURL, tags) {
+function createImageElement(webformatURL, largeImageURL, tags, likes, views, comments, downloads) {
     const imageElement = document.createElement('div');
     imageElement.classList.add('photo-card');
 
@@ -96,31 +107,32 @@ function createImageElement(webformatURL, largeImageURL, tags) {
     const infoDiv = document.createElement('div');
     infoDiv.classList.add('info');
 
-    const likes = document.createElement('p');
-    likes.classList.add('info-item');
-    likes.innerHTML = `<b>Likes:</b> ${tags}`;
-    infoDiv.appendChild(likes);
+    const likesElement = document.createElement('p');
+    likesElement.classList.add('info-item');
+    likesElement.innerHTML = `<b>Likes:</b> ${likes}`;
+    infoDiv.appendChild(likesElement);
 
-    const views = document.createElement('p');
-    views.classList.add('info-item');
-    views.innerHTML = `<b>Views:</b> ${tags}`;
-    infoDiv.appendChild(views);
+    const viewsElement = document.createElement('p');
+    viewsElement.classList.add('info-item');
+    viewsElement.innerHTML = `<b>Views:</b> ${views}`;
+    infoDiv.appendChild(viewsElement);
 
-    const comments = document.createElement('p');
-    comments.classList.add('info-item');
-    comments.innerHTML = `<b>Comments:</b> ${tags}`;
-    infoDiv.appendChild(comments);
+    const commentsElement = document.createElement('p');
+    commentsElement.classList.add('info-item');
+    commentsElement.innerHTML = `<b>Comments:</b> ${comments}`;
+    infoDiv.appendChild(commentsElement);
 
-    const downloads = document.createElement('p');
-    downloads.classList.add('info-item');
-    downloads.innerHTML = `<b>Downloads:</b> ${tags}`;
-    infoDiv.appendChild(downloads);
+    const downloadsElement = document.createElement('p');
+    downloadsElement.classList.add('info-item');
+    downloadsElement.innerHTML = `<b>Downloads:</b> ${downloads}`;
+    infoDiv.appendChild(downloadsElement);
 
     imageElement.appendChild(infoDiv);
 
     return imageElement;
 }
 
-function handleLoadMoreClick() {
-    fetchImages(searchForm.querySelector('input[name="searchQuery"]').value, page + 1);
+async function handleLoadMoreClick() {
+    page++;
+    await fetchImages();
 }

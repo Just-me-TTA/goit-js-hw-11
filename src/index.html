@@ -3,27 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link />
     <link rel="stylesheet" href="styles.css" />
     <title>Image Search</title>
   </head>
   <body>
-    <h1>Image Search</h1>
-    <form class="search-form" id="search-form">
-      <input
-        type="text"
-        name="searchQuery"
-        autocomplete="off"
-        placeholder="Search images..."
-      />
-      <button type="submit">Search</button>
-    </form>
+    <header class="header">
+      <h1>Image Search</h1>
+      <form class="search-form" id="search-form">
+        <input
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button type="submit">Search</button>
+      </form>
+    </header>
+
     <div class="gallery">
       <!-- Картки зображень будуть додаватися сюди -->
     </div>
-    <button type="button" class="load-more" style="display: none">
-      Load more
-    </button>
+    <button type="button" class="load-more">Load more</button>
     <p class="error-message hidden"></p>
-    <script src="index.js"></script>
+    <script src="index.js" type="module"></script>
   </body>
 </html>
