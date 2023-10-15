@@ -29,7 +29,7 @@ button {background-color: #4CAF50;
     transition: background-color 0.3s, transform 0.2s;}
 
 button:hover  {background-color: #135b16;
-    transform: scale(1.3);}
+    transform: scale(1.25);}
 
 button:active {background-color: #4CAF50;
     transform: scale(0.95)}
