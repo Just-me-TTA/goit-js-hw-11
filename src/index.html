@@ -3,15 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homework 10</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Image Search</title>
   </head>
   <body>
-    <select class="breed-select"></select>
-    <p class="loader">Loading data, please wait...</p>
-    <p class="error">Oops! Something went wrong! Try reloading the page!</p>
-    <div class="cat-info"></div>
-
-    <script src="index.js" type="module"></script>
+    <h1>Image Search</h1>
+    <form class="search-form" id="search-form">
+      <input
+        type="text"
+        name="searchQuery"
+        autocomplete="off"
+        placeholder="Search images..."
+      />
+      <button type="submit">Search</button>
+    </form>
+    <div class="gallery">
+      <!-- Картки зображень будуть додаватися сюди -->
+    </div>
+    <button type="button" class="load-more" style="display: none">
+      Load more
+    </button>
+    <p class="error-message hidden"></p>
+    <script src="index.js"></script>
   </body>
 </html>
